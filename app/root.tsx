@@ -6,7 +6,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
+import { ThemeProvider, ThemeContext } from './contexts/ThemeContext';
+import ThemeSwitcher from './components/ThemeSwitcher';
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -24,7 +26,19 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+function ThemedLayout({ children }: { children: React.ReactNode }) {
+  const { theme } = useContext(ThemeContext);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
+
   useEffect(() => {
     if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -45,11 +59,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <ThemeSwitcher />
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
+}
+
+export function Layout({ children }: { children: React.ReactNode }) {
+    return (
+        <ThemeProvider>
+            <ThemedLayout>{children}</ThemedLayout>
+        </ThemeProvider>
+    )
 }
 
 export default function App() {
