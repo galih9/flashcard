@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { transliterate } from '../utils';
 import { words } from '../data/words';
 import type { Word } from '../data/words';
 import Card from '../components/Card';
@@ -23,7 +24,7 @@ const GameScreen = () => {
   const [score, setScore] = useState(0);
   const [revealedSpelling, setRevealedSpelling] = useState('');
   const [isRevealing, setIsRevealing] = useState(false);
-  const [questionType, setQuestionType] = useState<'transliteration' | 'meaning'>('transliteration');
+  const [questionType, setQuestionType] = useState<'russian' | 'transliteration' | 'meaning'>('russian');
   const [incorrectAnswers, setIncorrectAnswers] = useState<Word[]>([]);
 
   const navigate = useNavigate();
@@ -35,16 +36,36 @@ const GameScreen = () => {
 
   useEffect(() => {
     if (gameWords.length > 0) {
+      const random = Math.random();
       // Randomize the question type for the new word
-      setQuestionType(Math.random() > 0.5 ? 'transliteration' : 'meaning');
+      if (random < 0.33) {
+        setQuestionType('russian');
+      } else if (random < 0.66) {
+        setQuestionType('transliteration');
+      } else {
+        setQuestionType('meaning');
+      }
     }
   }, [currentWordIndex, gameWords]);
+
+  useEffect(() => {
+    if (questionType !== 'russian' || !inputValue) return;
+
+    const hasLatin = /[a-zA-Z]/.test(inputValue);
+    if (hasLatin) {
+      const timer = setTimeout(() => {
+        setInputValue(transliterate(inputValue));
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [inputValue, questionType]);
 
   const handleCardClick = () => {
     if (isRevealing) return;
 
     setIsRevealing(true);
-    const wordToReveal = gameWords[currentWordIndex].transliteration;
+    const currentWord = gameWords[currentWordIndex];
+    const wordToReveal = `${currentWord.russian} (${currentWord.transliteration})`;
     let revealed = '';
     let i = 0;
     const interval = setInterval(() => {
@@ -63,9 +84,19 @@ const GameScreen = () => {
 
   const handleAnswerSubmit = () => {
     const currentWord = gameWords[currentWordIndex];
-    const correctAnswer = questionType === 'transliteration' ? currentWord.transliteration : currentWord.meaning;
+    let correctAnswer: string;
+    let userAnswer = inputValue;
 
-    if (inputValue.toLowerCase() === correctAnswer.toLowerCase()) {
+    if (questionType === 'russian') {
+      correctAnswer = currentWord.russian;
+      userAnswer = transliterate(inputValue);
+    } else if (questionType === 'transliteration') {
+      correctAnswer = currentWord.transliteration;
+    } else { // meaning
+      correctAnswer = currentWord.meaning;
+    }
+
+    if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
       setScore(score + 10);
     } else {
         setIncorrectAnswers([...incorrectAnswers, currentWord]);
@@ -85,17 +116,27 @@ const GameScreen = () => {
   }
 
   const currentWord = gameWords[currentWordIndex];
+  const getQuestion = () => {
+    switch (questionType) {
+      case 'russian':
+        return `What is the Russian for '${currentWord.meaning}'?`;
+      case 'transliteration':
+        return 'How do you spell this word in Latin letters?';
+      case 'meaning':
+        return 'What is the meaning of this word?';
+    }
+  }
 
   return (
     <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
       <div className="w-full max-w-md">
         <div className="text-center mb-4 text-2xl font-bold">Score: {score}</div>
         <div className="text-center mb-4 text-lg">
-            {questionType === 'transliteration' ? 'How do you spell this word in Latin letters?' : 'What is the meaning of this word?'}
+          {getQuestion()}
         </div>
         <div onClick={handleCardClick} className="cursor-pointer mb-4">
           <Card>
-            <h2 className="text-3xl font-bold text-center">{currentWord.russian}</h2>
+            <h2 className="text-3xl font-bold text-center">{questionType === 'meaning' || questionType === 'transliteration' ? currentWord.russian : currentWord.meaning}</h2>
             {revealedSpelling && (
                 <p className="text-center mt-2 text-xl">{revealedSpelling}</p>
             )}
