@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { transliterate } from "../utils";
 import { words } from "../data/words";
 import type { Word } from "../data/words";
@@ -17,8 +17,32 @@ const shuffleArray = (array: any[]) => {
   return newArray;
 };
 
+type Edition = "normal" | "foil" | "holographic" | "polychrome" | "negative";
+
+const editions: { type: Edition; probability: number; points: number }[] = [
+  { type: "normal", probability: 0.6, points: 10 },
+  { type: "foil", probability: 0.2, points: 25 },
+  { type: "holographic", probability: 0.1, points: 50 },
+  { type: "polychrome", probability: 0.05, points: 100 },
+  { type: "negative", probability: 0.05, points: 0 }, // Points for negative are special
+];
+
+const getRandomEdition = (): Edition => {
+  const random = Math.random();
+  let cumulativeProbability = 0;
+  for (const edition of editions) {
+    cumulativeProbability += edition.probability;
+    if (random < cumulativeProbability) {
+      return edition.type;
+    }
+  }
+  return "normal"; // Fallback
+};
+
+type GameWord = Word & { edition: Edition };
+
 const GameScreen = () => {
-  const [gameWords, setGameWords] = useState<Word[]>([]);
+  const [gameWords, setGameWords] = useState<GameWord[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [score, setScore] = useState(0);
@@ -30,11 +54,17 @@ const GameScreen = () => {
   const [incorrectAnswers, setIncorrectAnswers] = useState<Word[]>([]);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const level = location.state?.level || 0;
 
   useEffect(() => {
-    // Shuffle words and take the first 10 for the game
-    setGameWords(shuffleArray(words).slice(0, 10));
-  }, []);
+    // Shuffle words from the selected level and assign random editions
+    const wordsWithEditions = shuffleArray(words[level]).map((word: Word) => ({
+      ...word,
+      edition: getRandomEdition(),
+    }));
+    setGameWords(wordsWithEditions);
+  }, [level]);
 
   useEffect(() => {
     if (gameWords.length > 0) {
@@ -84,25 +114,37 @@ const GameScreen = () => {
     }, 100);
   };
 
-  const checkIfAnswerCorrect = (answers: string[]) => {};
+  const checkIfAnswerCorrect = (userAnswer: string, correctAnswers: string[]) => {
+    return correctAnswers.some(
+      (answer) => answer.toLowerCase() === userAnswer.toLowerCase()
+    );
+  };
 
   const handleAnswerSubmit = () => {
     const currentWord = gameWords[currentWordIndex];
-    let correctAnswer: string;
+    let correctAnswers: string[];
     let userAnswer = inputValue;
 
     if (questionType === "russian") {
-      correctAnswer = currentWord.russian[0];
+      correctAnswers = currentWord.russian;
       userAnswer = transliterate(inputValue);
     } else if (questionType === "transliteration") {
-      correctAnswer = currentWord.transliteration[0];
+      correctAnswers = currentWord.transliteration;
     } else {
       // meaning
-      correctAnswer = currentWord.meaning[0];
+      correctAnswers = currentWord.meaning;
     }
 
-    if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
-      setScore(score + 10);
+    if (checkIfAnswerCorrect(userAnswer, correctAnswers)) {
+      const edition = currentWord.edition;
+      if (edition === "negative") {
+        setScore(score * 2);
+      } else {
+        const editionData = editions.find((e) => e.type === edition);
+        if (editionData) {
+          setScore(score + editionData.points);
+        }
+      }
     } else {
       setIncorrectAnswers([...incorrectAnswers, currentWord]);
     }
