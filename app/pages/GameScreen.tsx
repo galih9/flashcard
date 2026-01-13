@@ -162,6 +162,7 @@ const GameScreen = () => {
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          onSubmit={handleAnswerSubmit}
         />
         <div className="mt-4 flex justify-center">
           <Button onClick={handleAnswerSubmit}>Submit</Button>
