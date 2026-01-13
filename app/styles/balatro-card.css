@@ -1,0 +1,147 @@
+.balatro-card {
+  --card-radius: 0.75rem; /* rounded-xl */
+  /* Remove fixed avatar-size, rely on container or content */
+
+  touch-action: none;
+  isolation: isolate;
+  /* max-width: max-content; */
+  /* margin-block: 1.5rem; */
+  /* padding: var(--avatar-padding); */
+  border-radius: var(--card-radius);
+
+  --t: 2px;
+  --k: 0.05turn;
+  --transform: translate(calc(var(--t) * var(--x)), calc(var(--t) * var(--y)))
+    rotateY(calc(var(--k) * var(--x))) rotateX(calc(var(--k) * var(--y)));
+
+  display: block; /* changed from flex to block to act as a normal container */
+  position: relative;
+  background-color: transparent;
+  /* The actual background color will be handled by the background layer or the component inside */
+}
+
+/* Layers */
+.balatro-card [data-element="background"],
+.balatro-card [data-element="rainbow"],
+.balatro-card [data-element="shine"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--card-radius);
+  pointer-events: none;
+}
+
+.balatro-card [data-element="background"] {
+  z-index: 1;
+  background-color: white; /* Default background */
+}
+/* Dark mode support logic could be added here or via tailwind classes on the background element */
+:is(.dark .balatro-card) [data-element="background"] {
+  background-color: #1f2937; /* gray-800 */
+}
+
+.balatro-card [data-element="rainbow"] {
+  z-index: 2;
+}
+
+.balatro-card [data-element="shine"] {
+  z-index: 3;
+}
+
+.balatro-card [data-element="content"] {
+  z-index: 4;
+  position: relative;
+  transform: var(
+    --transform
+  ); /* Apply 3D transform to content as well? Or just the card container? */
+  /* The reference applies transform to the 'img' and other non-image elements subtly differently. 
+     Let's try applying transform to a content wrapper. */
+}
+
+/* Interaction States */
+
+.balatro-card[data-state="outside"] [data-element="content"],
+.balatro-card[data-state="outside"] [data-element="background"] {
+  transition-timing-function: ease;
+  transition-duration: 500ms;
+  transition-property: transform, box-shadow;
+}
+
+.balatro-card[data-state="inside"] [data-element="content"] {
+  transform: var(--transform);
+  /* Add shadow logic here if needed, adapted for rectangle */
+  --k1: calc(-1 / 8);
+  --k2: calc(1 / 16);
+  /* Simplified shadow for rectangle */
+  box-shadow: calc(var(--k1) * 20px * var(--x))
+    calc(var(--k1) * 20px * var(--y)) 20px #0002;
+}
+
+.balatro-card[data-state="inside"] [data-element="background"] {
+  transform: var(--transform);
+}
+
+/* Shine and Rainbow */
+
+.balatro-card [data-element="shine"],
+.balatro-card [data-element="rainbow"] {
+  opacity: 0;
+  /* Removed clip-path: circle(50%) */
+  border-radius: var(--card-radius);
+  transition: opacity 500ms;
+}
+
+.balatro-card[data-state="inside"] [data-element="shine"],
+.balatro-card[data-state="inside"] [data-element="rainbow"] {
+  opacity: 1;
+  /* Apply transform to these too so they tilt with the card */
+  transform: var(--transform);
+}
+
+.balatro-card [data-element="shine"] {
+  mix-blend-mode: hard-light;
+
+  /* https://css-pattern.com/wave-circles/ */
+  --s: 30px; /* control the size*/
+  --c1: hsl(0 0% 80%);
+  --c2: hsl(0 0% 50%);
+
+  --_g: var(--s) var(--s)
+    radial-gradient(var(--c1) 17%, var(--c2) 18% 35%, #0000 36.5%);
+
+  mask-image: linear-gradient(
+    var(--angle),
+    hsl(0 0% 0% / 70%),
+    hsl(0 0% 0% / 0%) calc(100% * var(--r))
+  );
+  -webkit-mask-image: linear-gradient(
+    var(--angle),
+    hsl(0 0% 0% / 70%),
+    hsl(0 0% 0% / 0%) calc(100% * var(--r))
+  );
+
+  background:
+    calc(var(--s) / -4) calc(var(--s) / -4) / var(--_g),
+    calc(var(--s) / 4) calc(var(--s) / 4) / var(--_g),
+    radial-gradient(var(--c2) 34%, var(--c1) 36% 68%, #0000 70%) 0 0 /
+      calc(var(--s) / 2) calc(var(--s) / 2),
+    repeating-linear-gradient(45deg, var(--c1) -12.5% 12.5%, var(--c2) 0 37.5%)
+      0 0 / var(--s) var(--s);
+}
+
+.balatro-card [data-element="rainbow"] {
+  mix-blend-mode: hard-light;
+  background: linear-gradient(
+      var(--angle),
+      hsl(var(--angle) 100% 80% / 70%),
+      hsl(var(--angle) 100% 80% / 10%) calc(100% * var(--r))
+    )
+    0 0 / 100% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balatro-card {
+    --k: 0turn;
+  }
+}
