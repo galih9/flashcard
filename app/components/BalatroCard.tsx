@@ -4,14 +4,22 @@ import "../styles/balatro-card.css";
 interface BalatroCardProps {
   children: React.ReactNode;
   className?: string; // Allow passing extra classes
+  variant?: "normal" | "foil" | "holographic" | "polychrome" | "negative";
 }
 
-const BalatroCard = ({ children, className = "" }: BalatroCardProps) => {
+const BalatroCard = ({
+  children,
+  className = "",
+  variant = "normal",
+}: BalatroCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
+
+    // Update variant data attribute dynamically if it changes
+    card.dataset.variant = variant;
 
     // Helper functions
     const clamp = (x: number) => Math.min(1, Math.max(-1, x));
@@ -72,7 +80,7 @@ const BalatroCard = ({ children, className = "" }: BalatroCardProps) => {
       card.removeEventListener("pointerenter", handlePointerEnter);
       card.removeEventListener("pointerleave", handlePointerLeave);
     };
-  }, []);
+  }, [variant]);
 
   return (
     <div ref={cardRef} className={`balatro-card ${className}`}>

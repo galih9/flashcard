@@ -133,21 +133,31 @@ const GameScreen = () => {
   return (
     <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
       <div className="w-full max-w-md">
-        <div className="text-center mb-4 text-2xl font-bold">
+        <div className="text-center text-gray-500 dark:text-gray-400 mb-4 text-2xl font-bold">
           Score: {score}
         </div>
-        <div className="text-center mb-4 text-lg">{getQuestion()}</div>
-        <div onClick={handleCardClick} className="cursor-pointer mb-4">
-          <BalatroCard>
-            <h2 className="text-3xl font-bold text-center">
-              {questionType === "meaning" || questionType === "transliteration"
-                ? currentWord.russian
-                : currentWord.meaning}
-            </h2>
-            {revealedSpelling && (
-              <p className="text-center mt-2 text-xl">{revealedSpelling}</p>
-            )}
-          </BalatroCard>
+        <div className="text-center text-gray-500 dark:text-gray-400 mb-4 text-lg">
+          {getQuestion()}
+        </div>
+        <div
+          onClick={handleCardClick}
+          className="cursor-pointer mb-4 flex justify-center"
+        >
+          <div className="w-[300px]">
+            <BalatroCard>
+              <h2 className="h-[380px] text-gray-500 dark:text-gray-400ƒ text-3xl font-bold text-center">
+                {questionType === "meaning" ||
+                questionType === "transliteration"
+                  ? currentWord.russian
+                  : currentWord.meaning}
+              </h2>
+              {revealedSpelling && (
+                <div className="mt-2 text-sm bg-white/50 p-2 rounded">
+                  <p>{revealedSpelling}</p>
+                </div>
+              )}
+            </BalatroCard>
+          </div>
         </div>
         <Input
           value={inputValue}

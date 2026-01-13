@@ -5,11 +5,20 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+
+@variant dark (&:where(.dark, .dark *));
+
 html,
 body {
   @apply bg-white dark:bg-gray-950;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+/* Apply color-scheme based on the class as well */
+:root:has(.dark) {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Fallback or system preference if needed, but the class strategy usually overrides or works alongside */
+  /* color-scheme: dark; */
 }

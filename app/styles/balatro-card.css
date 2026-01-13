@@ -102,32 +102,8 @@
 .balatro-card [data-element="shine"] {
   mix-blend-mode: hard-light;
 
-  /* https://css-pattern.com/wave-circles/ */
-  --s: 30px; /* control the size*/
-  --c1: hsl(0 0% 80%);
-  --c2: hsl(0 0% 50%);
-
-  --_g: var(--s) var(--s)
-    radial-gradient(var(--c1) 17%, var(--c2) 18% 35%, #0000 36.5%);
-
-  mask-image: linear-gradient(
-    var(--angle),
-    hsl(0 0% 0% / 70%),
-    hsl(0 0% 0% / 0%) calc(100% * var(--r))
-  );
-  -webkit-mask-image: linear-gradient(
-    var(--angle),
-    hsl(0 0% 0% / 70%),
-    hsl(0 0% 0% / 0%) calc(100% * var(--r))
-  );
-
-  background:
-    calc(var(--s) / -4) calc(var(--s) / -4) / var(--_g),
-    calc(var(--s) / 4) calc(var(--s) / 4) / var(--_g),
-    radial-gradient(var(--c2) 34%, var(--c1) 36% 68%, #0000 70%) 0 0 /
-      calc(var(--s) / 2) calc(var(--s) / 2),
-    repeating-linear-gradient(45deg, var(--c1) -12.5% 12.5%, var(--c2) 0 37.5%)
-      0 0 / var(--s) var(--s);
+  /* Default Shine (Clean/Subtle) - Removed Wave Pattern */
+  background: transparent;
 }
 
 .balatro-card [data-element="rainbow"] {
@@ -138,6 +114,80 @@
       hsl(var(--angle) 100% 80% / 10%) calc(100% * var(--r))
     )
     0 0 / 100% 100%;
+}
+
+
+/* --- VARIANTS --- */
+
+/* Normal: Clean, no holographic effects */
+.balatro-card[data-variant="normal"] [data-element="shine"],
+.balatro-card[data-variant="normal"] [data-element="rainbow"] {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Foil: Blue-ish, Circular/Interference Pattern */
+.balatro-card[data-variant="foil"] [data-element="shine"] {
+  mix-blend-mode: hard-light;
+  opacity: 0.6;
+  --c1: hsl(220 60% 70%); /* Light Blue */
+  --c2: hsl(220 60% 40%); /* Dark Blue */
+  
+  /* Concentric circles / Interference pattern */
+  background: repeating-radial-gradient(
+    circle at 50% 50%,
+    var(--c1) 0%,
+    var(--c2) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  background-size: 100% 100%;
+}
+.balatro-card[data-variant="foil"] [data-element="rainbow"] {
+  opacity: 0.2; 
+}
+
+
+/* Holographic: Red-ish, Diamond/Grid Pattern */
+.balatro-card[data-variant="holographic"] [data-element="shine"] {
+  mix-blend-mode: hard-light;
+  --s: 60px; /* Larger size for visibility */
+  --c1: hsl(0 60% 70%); /* Light Red */
+  --c2: hsl(0 60% 40%); /* Dark Red */
+  --line-width: 2px; /* Thickness of the diamond lines */
+
+  /* Diagonal cross-hatch creating diamonds */
+  background: 
+    linear-gradient(135deg, transparent calc(50% - var(--line-width)), var(--c1) 50%, transparent calc(50% + var(--line-width))),
+    linear-gradient(45deg, transparent calc(50% - var(--line-width)), var(--c2) 50%, transparent calc(50% + var(--line-width)));
+  background-size: var(--s) var(--s);
+}
+.balatro-card[data-variant="holographic"] [data-element="rainbow"] {
+    opacity: 0.5;
+}
+
+
+/* Polychrome: Strong Rainbow + Noise Texture */
+.balatro-card[data-variant="polychrome"] [data-element="shine"] {
+    display: block; /* Enable shine for texture */
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+    
+    /* Noise / Grain Pattern */
+    background-image: radial-gradient(circle, #000 0.5px, transparent 1px);
+    background-size: 4px 4px;
+}
+.balatro-card[data-variant="polychrome"] [data-element="rainbow"] {
+  opacity: 0.9;
+  mix-blend-mode: hard-light; 
+  filter: brightness(1.2) contrast(1.2) saturate(1.5);
+}
+
+
+/* Negative: Inverted */
+.balatro-card[data-variant="negative"] {
+    filter: invert(1);
+    /* Removed manual background-color black override so invert(1) works correctly on the white default */
 }
 
 @media (prefers-reduced-motion: reduce) {
