@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { words } from "../data/words";
-import Card from "../components/Card";
 import Button from "../components/Button";
 import BalatroCard from "../components/BalatroCard";
 
@@ -26,13 +25,13 @@ const MainMenu = () => {
         Russian Flashcards
       </h1>
       <div className="flex flex-wrap gap-4 justify-center">
-        {words.map((word, index) => (
+        {words[0].map((word, index) => (
           <div
             key={index}
             onClick={() => handleCardClick(index)}
             className="cursor-pointer"
           >
-            <BalatroCard variant={variants[index % variants.length]}>
+            <BalatroCard variant={"holographic"}>
               <div className="h-[300px] w-[180px] flex flex-col justify-between">
                 <div>
                   <h2 className="text-xl text-gray-500 dark:text-gray-400ƒ font-semibold">

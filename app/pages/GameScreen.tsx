@@ -84,19 +84,21 @@ const GameScreen = () => {
     }, 100);
   };
 
+  const checkIfAnswerCorrect = (answers: string[]) => {};
+
   const handleAnswerSubmit = () => {
     const currentWord = gameWords[currentWordIndex];
     let correctAnswer: string;
     let userAnswer = inputValue;
 
     if (questionType === "russian") {
-      correctAnswer = currentWord.russian;
+      correctAnswer = currentWord.russian[0];
       userAnswer = transliterate(inputValue);
     } else if (questionType === "transliteration") {
-      correctAnswer = currentWord.transliteration;
+      correctAnswer = currentWord.transliteration[0];
     } else {
       // meaning
-      correctAnswer = currentWord.meaning;
+      correctAnswer = currentWord.meaning[0];
     }
 
     if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
