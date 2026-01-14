@@ -86,7 +86,7 @@ const BalatroCard = ({
     <div ref={cardRef} className={`balatro-card ${className}`}>
       <div
         data-element="background"
-        className="rounded-xl shadow-md bg-white dark:bg-gray-800"
+        className="shadow-md bg-white dark:bg-gray-800"
       ></div>
       <div data-element="rainbow"></div>
       <div data-element="shine"></div>
